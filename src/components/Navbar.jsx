@@ -1,4 +1,5 @@
 import { Moon, Sun } from 'lucide-react'
+import { Show, SignInButton, SignUpButton, UserButton } from '@clerk/react'
 import Logo from './Logo'
 
 const LINKS = ['Accueil', 'Fonctionnalités', 'Modèle', 'Équipes', 'Contact']
@@ -37,19 +38,32 @@ export default function Navbar({ dark, onToggleDark, onReset }) {
             {dark ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}
           </button>
 
-          <button
-            type="button"
-            className="hidden rounded-full px-4 py-2 text-sm font-semibold text-brand-800 transition hover:bg-brand-100 sm:block dark:text-brand-100 dark:hover:bg-white/5"
-          >
-            Connexion
-          </button>
+          <Show when="signed-out">
+            <SignInButton mode="modal">
+              <button
+                type="button"
+                className="hidden rounded-full px-4 py-2 text-sm font-semibold text-brand-800 transition hover:bg-brand-100 sm:block dark:text-brand-100 dark:hover:bg-white/5"
+              >
+                Connexion
+              </button>
+            </SignInButton>
 
-          <button
-            type="button"
-            className="rounded-full bg-gradient-to-br from-brand-700 to-brand-500 px-4 py-2 text-sm font-semibold text-brand-50 shadow-sm shadow-brand-900/20 transition hover:opacity-90"
-          >
-            Démarrer
-          </button>
+            <SignUpButton mode="modal">
+              <button
+                type="button"
+                className="rounded-full bg-gradient-to-br from-brand-700 to-brand-500 px-4 py-2 text-sm font-semibold text-brand-50 shadow-sm shadow-brand-900/20 transition hover:opacity-90"
+              >
+                Démarrer
+              </button>
+            </SignUpButton>
+          </Show>
+
+          <Show when="signed-in">
+            <UserButton
+              afterSignOutUrl="/"
+              appearance={{ elements: { avatarBox: 'h-9 w-9' } }}
+            />
+          </Show>
         </div>
       </div>
     </header>
