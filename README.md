@@ -5,7 +5,7 @@ Interface web de chat du **Challenge IA TechCorp**, propulsée par le modèle
 indigo/bleu, dégradé d'ambiance), construit avec **React + Vite + Tailwind CSS v4**.
 
 > État actuel : **front uniquement**. Les réponses sont simulées (mock en
-> streaming). Le branchement au vrai serveur d'inférence se fait en un point.
+> streaming).
 
 ## Démarrer
 
