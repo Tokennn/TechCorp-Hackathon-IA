@@ -1,0 +1,26 @@
+{
+  "name": "techcorp-ia-chat",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Interface de chat IA — Challenge IA TechCorp (modèle Phi-3.5-Financial)",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "gsap": "^3.15.0",
+    "lucide-react": "^0.456.0",
+    "ogl": "^1.0.11",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "three": "^0.185.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "tailwindcss": "^4.0.0",
+    "vite": "^6.0.7"
+  }
+}

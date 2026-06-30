@@ -1,0 +1,84 @@
+@import 'tailwindcss';
+
+/* Active le mode sombre piloté par la classe `.dark` sur <html> */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system,
+    'Segoe UI', sans-serif;
+  --font-display: 'Baloo 2', 'Plus Jakarta Sans', ui-sans-serif, system-ui,
+    sans-serif;
+
+  /* Palette de marque TechCorp (olive — couleurs du logo) */
+  --color-brand-50: #f7f6e9;
+  --color-brand-100: #ecead0;
+  --color-brand-200: #d8d4a0;
+  --color-brand-300: #beb86e;
+  --color-brand-400: #a39c4c;
+  --color-brand-500: #84803a;
+  --color-brand-600: #66632d;
+  --color-brand-700: #4d4a24;
+  --color-brand-800: #38361b;
+  --color-brand-900: #2c2a15;
+
+  /* Surfaces crème */
+  --color-paper: #f3eedb;
+  --color-paper-dark: #ebe4cb;
+  --color-surface: #fbf8ee;
+  --color-ink: #2c2a15;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Scrollbar discrète */
+.scrollbar-slim::-webkit-scrollbar {
+  width: 8px;
+}
+.scrollbar-slim::-webkit-scrollbar-thumb {
+  background: rgb(148 163 184 / 0.35);
+  border-radius: 9999px;
+}
+.scrollbar-slim::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Indicateur de saisie (typing dots) */
+@keyframes typing-bounce {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  40% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+.typing-dot {
+  animation: typing-bounce 1.2s infinite ease-in-out;
+}
+
+/* Apparition douce des messages */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.35s ease-out both;
+}
