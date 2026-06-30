@@ -11,7 +11,7 @@ export default function ChatView({ messages, isStreaming, onSend, onStop }) {
   }, [messages])
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-4rem)] w-full max-w-3xl flex-col px-4 sm:px-5">
+    <div className="mx-auto flex h-full w-full max-w-3xl flex-col px-4 sm:px-5">
       <div className="scrollbar-slim flex-1 space-y-5 overflow-y-auto py-8">
         {messages.map((m) => (
           <MessageBubble

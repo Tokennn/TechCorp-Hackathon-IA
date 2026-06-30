@@ -165,7 +165,7 @@ export default function App() {
   const hasConversation = messages.length > 0
 
   return (
-    <div className="relative min-h-screen bg-paper text-ink dark:bg-brand-900 dark:text-brand-50">
+    <div className="relative h-screen overflow-hidden bg-paper text-ink dark:bg-brand-900 dark:text-brand-50">
       {/* Dégradé d'ambiance crème/olive */}
       <div className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-paper via-paper to-paper-dark dark:from-brand-900 dark:via-brand-900 dark:to-brand-800" />
@@ -188,7 +188,7 @@ export default function App() {
 
       <Navbar dark={dark} onToggleDark={handleToggleTheme} onReset={handleReset} />
 
-      <main>
+      <main className="h-full">
         {hasConversation ? (
           <ChatView
             messages={messages}

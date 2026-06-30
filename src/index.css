@@ -28,6 +28,32 @@
   --color-ink: #2c2a15;
 }
 
+/* Couleurs des pills facon PillNav (React Bits) — adaptées clair/sombre.
+   --pill-bg      : fond de la pastille au repos (pillColor)
+   --pill-text    : texte au repos (pillTextColor)
+   --pill-base    : couleur du cercle qui remplit au survol (baseColor)
+   --pill-hover   : texte au survol (hoveredPillTextColor) */
+:root {
+  --pill-bg: #2c2a15; /* capsule olive foncé */
+  --pill-text: #f3eedb; /* texte crème */
+  --pill-base: #f3eedb; /* remplissage crème au survol */
+  --pill-hover: #2c2a15; /* texte olive au survol */
+}
+.dark {
+  --pill-bg: #d8d4a0; /* capsule olive clair */
+  --pill-text: #2c2a15;
+  --pill-base: #2c2a15;
+  --pill-hover: #d8d4a0;
+}
+
+/* Couleur du mot « Yves » (TextPressure) — noir en clair, crème en sombre */
+:root {
+  --yves: #141208;
+}
+.dark {
+  --yves: #f3eedb;
+}
+
 html {
   scroll-behavior: smooth;
 }
