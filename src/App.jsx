@@ -1,17 +1,33 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
+import { useAuth } from '@clerk/react'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import ChatView from './components/ChatView'
 import Particles from './components/Particles'
+import Sidebar from './components/Sidebar'
 import { sendChatMessage } from './lib/api'
+import { useSupabase } from './lib/useSupabase'
+import {
+  listConversations,
+  fetchMessages,
+  createConversation,
+  addMessage,
+  deleteConversation,
+} from './lib/history'
 
 let idCounter = 0
 const nextId = () => `m-${++idCounter}`
 
 export default function App() {
+  const supabase = useSupabase()
+  const { isSignedIn } = useAuth()
+
   const [messages, setMessages] = useState([])
   const [isStreaming, setIsStreaming] = useState(false)
+  const [conversations, setConversations] = useState([])
+  const [currentConversationId, setCurrentConversationId] = useState(null)
+  const [loadingConvs, setLoadingConvs] = useState(false)
   const [dark, setDark] = useState(
     () =>
       localStorage.getItem('tc-theme') === 'dark' ||
@@ -26,6 +42,25 @@ export default function App() {
     document.documentElement.classList.toggle('dark', dark)
     localStorage.setItem('tc-theme', dark ? 'dark' : 'light')
   }, [dark])
+
+  // Charge la liste des conversations de l'utilisateur connecté
+  useEffect(() => {
+    if (!supabase || !isSignedIn) {
+      setConversations([])
+      return
+    }
+    let active = true
+    setLoadingConvs(true)
+    listConversations(supabase)
+      .then((rows) => active && setConversations(rows))
+      .catch((e) => console.error('Chargement historique échoué', e))
+      .finally(() => active && setLoadingConvs(false))
+    return () => {
+      active = false
+    }
+  }, [supabase, isSignedIn])
+
+  const showSidebar = Boolean(supabase && isSignedIn)
 
   const handleSend = useCallback(
     async (text) => {
@@ -52,8 +87,24 @@ export default function App() {
       const controller = new AbortController()
       abortRef.current = controller
 
+      // Persistance : crée la conversation au 1ᵉʳ message, enregistre la question.
+      let convId = currentConversationId
+      if (supabase) {
+        try {
+          if (!convId) {
+            const conv = await createConversation(supabase, text)
+            convId = conv.id
+            setCurrentConversationId(convId)
+            setConversations((prev) => [conv, ...prev])
+          }
+          await addMessage(supabase, convId, 'user', text)
+        } catch (e) {
+          console.error('Enregistrement de la question échoué', e)
+        }
+      }
+
       try {
-        await sendChatMessage(history, {
+        const fullText = await sendChatMessage(history, {
           signal: controller.signal,
           onToken: (chunk) => {
             setMessages((prev) =>
@@ -65,6 +116,15 @@ export default function App() {
             )
           },
         })
+
+        // Enregistre la réponse de l'assistant
+        if (supabase && convId && fullText) {
+          try {
+            await addMessage(supabase, convId, 'assistant', fullText)
+          } catch (e) {
+            console.error('Enregistrement de la réponse échoué', e)
+          }
+        }
       } catch (err) {
         setMessages((prev) =>
           prev.map((m) =>
@@ -89,7 +149,7 @@ export default function App() {
         abortRef.current = null
       }
     },
-    [isStreaming, messages],
+    [isStreaming, messages, supabase, currentConversationId],
   )
 
   // Bascule de thème avec révélation circulaire GSAP (fiable cross-browser).
@@ -156,11 +216,48 @@ export default function App() {
     setIsStreaming(false)
   }, [])
 
-  const handleReset = useCallback(() => {
+  const handleNewConversation = useCallback(() => {
     if (isStreaming) abortRef.current?.abort()
     setMessages([])
+    setCurrentConversationId(null)
     setIsStreaming(false)
   }, [isStreaming])
+
+  // Charge une conversation de l'historique au clic dans la sidebar
+  const loadConversation = useCallback(
+    async (id) => {
+      if (!supabase) return
+      if (isStreaming) abortRef.current?.abort()
+      setIsStreaming(false)
+      setCurrentConversationId(id)
+      try {
+        const rows = await fetchMessages(supabase, id)
+        setMessages(
+          rows.map((r) => ({ id: r.id, role: r.role, content: r.content })),
+        )
+      } catch (e) {
+        console.error('Chargement de la conversation échoué', e)
+      }
+    },
+    [supabase, isStreaming],
+  )
+
+  const handleDeleteConversation = useCallback(
+    async (id) => {
+      if (!supabase) return
+      try {
+        await deleteConversation(supabase, id)
+        setConversations((prev) => prev.filter((c) => c.id !== id))
+        if (id === currentConversationId) {
+          setMessages([])
+          setCurrentConversationId(null)
+        }
+      } catch (e) {
+        console.error('Suppression échouée', e)
+      }
+    },
+    [supabase, currentConversationId],
+  )
 
   const hasConversation = messages.length > 0
 
@@ -186,19 +283,34 @@ export default function App() {
         />
       </div>
 
-      <Navbar dark={dark} onToggleDark={handleToggleTheme} onReset={handleReset} />
+      <Navbar dark={dark} onToggleDark={handleToggleTheme} />
 
       <main className="h-full">
-        {hasConversation ? (
-          <ChatView
-            messages={messages}
-            isStreaming={isStreaming}
-            onSend={handleSend}
-            onStop={handleStop}
-          />
-        ) : (
-          <Hero onSend={handleSend} />
-        )}
+        <div className="flex h-full">
+          {showSidebar && (
+            <Sidebar
+              conversations={conversations}
+              currentId={currentConversationId}
+              loading={loadingConvs}
+              onSelect={loadConversation}
+              onNew={handleNewConversation}
+              onDelete={handleDeleteConversation}
+            />
+          )}
+
+          <div className="relative h-full flex-1 overflow-hidden">
+            {hasConversation ? (
+              <ChatView
+                messages={messages}
+                isStreaming={isStreaming}
+                onSend={handleSend}
+                onStop={handleStop}
+              />
+            ) : (
+              <Hero onSend={handleSend} />
+            )}
+          </div>
+        </div>
       </main>
     </div>
   )
